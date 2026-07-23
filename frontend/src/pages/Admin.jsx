@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Admin.css'
 
+const API_URL = import.meta.env.PROD ? '' : 'http://localhost:3000';
+
 function formatFecha(iso) {
   if (!iso) return '—'
   const d = new Date(iso)
@@ -29,7 +31,7 @@ export default function Admin() {
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('http://localhost:3000/api/appointments')
+      const res = await fetch(`${API_URL}/api/appointments`)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       setAppointments(await res.json())
     } catch {

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Agendar.css'
 
+const API_URL = import.meta.env.PROD ? '' : 'http://localhost:3000';
+
 const MONTHS = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
@@ -143,7 +145,7 @@ export default function Agendar() {
       weekdays.map(async (day) => {
         try {
           const res = await fetch(
-            `http://localhost:3000/api/appointments/available?fecha=${toDateString(year, month, day)}`
+            `${API_URL}/api/appointments/available?fecha=${toDateString(year, month, day)}`
           )
           if (!res.ok) return [day, 0]
           const data = await res.json()
@@ -165,7 +167,7 @@ export default function Agendar() {
     const controller = new AbortController()
     const fecha = toDateString(year, month, selectedDay)
     setLoading(true); setError(null); setSlots([]); setSelectedSlot(null)
-    fetch(`http://localhost:3000/api/appointments/available?fecha=${fecha}`, { signal: controller.signal })
+    fetch(`${API_URL}/api/appointments/available?fecha=${fecha}`, { signal: controller.signal })
       .then((res) => { if (!res.ok) throw new Error(`HTTP ${res.status}`); return res.json() })
       .then((data) => setSlots(data.map(normalizeSlot)))
       .catch((err) => { if (err.name !== 'AbortError') setError('Error al cargar horarios') })
@@ -221,7 +223,7 @@ export default function Agendar() {
         notas:            form.notas,
       }
       console.log('Enviando al backend:', datosACitar)
-      const res = await fetch('http://localhost:3000/api/appointments', {
+      const res = await fetch(`${API_URL}/api/appointments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(datosACitar),
