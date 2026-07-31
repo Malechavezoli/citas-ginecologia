@@ -16,7 +16,7 @@ const appointmentSchema = new mongoose.Schema(
     },
     estado: {
       type: String,
-      enum: ['pendiente', 'confirmada', 'cancelada'],
+      enum: ['pendiente', 'aceptada', 'rechazada'],
       default: 'pendiente',
     },
     nombrePaciente: {

@@ -90,7 +90,7 @@ const getAvailableSlots = async (req, res) => {
 
     const bookedAppointments = await Appointment.find({
       fecha: { $gte: startOfDay(day), $lte: endOfDay(day) },
-      estado: { $in: ['pendiente', 'confirmada'] },
+      estado: { $in: ['pendiente', 'aceptada'] },
     });
 
     console.log('Citas reservadas:', bookedAppointments.map(a => ({ fecha: a.fecha, hora: a.hora })));
@@ -130,7 +130,8 @@ const createAppointment = async (req, res) => {
       return res.status(400).json({ message: 'Faltan campos obligatorios: fecha, nombrePaciente, correoPaciente' });
     }
 
-    const parsedDate = new Date(fecha + 'T' + (hora || '08:00') + ':00.000Z');
+    // -05:00 fijo: Colombia no observa horario de verano.
+    const parsedDate = new Date(fecha + 'T' + (hora || '08:00') + ':00.000-05:00');
 
     const appointment = new Appointment({
       fecha: parsedDate,
@@ -183,7 +184,7 @@ const deleteAppointment = async (req, res) => {
   try {
     const appointment = await Appointment.findByIdAndUpdate(
       req.params.id,
-      { estado: 'cancelada' },
+      { estado: 'rechazada' },
       { new: true }
     );
 
@@ -197,10 +198,39 @@ const deleteAppointment = async (req, res) => {
   }
 };
 
+const ESTADOS_VALIDOS = ['pendiente', 'aceptada', 'rechazada'];
+
+const updateEstado = async (req, res) => {
+  try {
+    const { estado } = req.body;
+
+    if (!ESTADOS_VALIDOS.includes(estado)) {
+      return res.status(400).json({
+        message: `estado debe ser uno de: ${ESTADOS_VALIDOS.join(', ')}`,
+      });
+    }
+
+    const appointment = await Appointment.findByIdAndUpdate(
+      req.params.id,
+      { estado },
+      { new: true, runValidators: true }
+    );
+
+    if (!appointment) {
+      return res.status(404).json({ message: 'Cita no encontrada' });
+    }
+
+    res.json(appointment);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getAvailableSlots,
   createAppointment,
   getAppointments,
   updateAppointment,
   deleteAppointment,
+  updateEstado,
 };
