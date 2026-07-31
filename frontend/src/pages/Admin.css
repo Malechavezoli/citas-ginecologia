@@ -136,6 +136,41 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 18px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── View toggle (Lista / Calendario) ── */
+.admin-view-toggle {
+  display: flex;
+  background: #f2f6f4;
+  border-radius: 10px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.view-toggle-btn {
+  background: none;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #7a9e8e;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.view-toggle-btn--active {
+  background: #ffffff;
+  color: #2d9e6b;
+  box-shadow: 0 1px 6px rgba(45, 158, 107, 0.18);
 }
 
 .admin-table-title {
@@ -265,6 +300,317 @@
 .badge--pending   { background: #fef3c7; color: #d97706; }
 .badge--confirmed { background: #d1fae5; color: #2d9e6b; }
 .badge--cancelled { background: #fee2e2; color: #e05454; }
+
+/* ── Row actions (aceptar/rechazar) ── */
+.row-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-accept,
+.btn-reject {
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s, transform 0.15s;
+}
+.btn-accept {
+  background: #d1fae5;
+  color: #2d9e6b;
+}
+.btn-accept:hover:not(:disabled) {
+  background: #2d9e6b;
+  color: #ffffff;
+}
+.btn-reject {
+  background: #fee2e2;
+  color: #e05454;
+}
+.btn-reject:hover:not(:disabled) {
+  background: #e05454;
+  color: #ffffff;
+}
+.btn-accept:disabled,
+.btn-reject:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Calendario (react-big-calendar) ──────────────────────────────────── */
+.admin-calendar-wrap {
+  --cal-accent:        #7d54a8;   /* lavanda sólido: estados activos */
+  --cal-accent-soft:   #f4eefb;   /* lavanda muy suave: hover/washes */
+  --cal-accent-border: #e3d6f2;   /* lavanda hairline */
+  --cal-today-tint:    #f2faf6;   /* verde-menta muy sutil para "hoy" */
+  --cal-ink:           #2c2a30;
+  --cal-ink-soft:      #8b8794;
+  --cal-grid-line:     #ece8f0;
+
+  --cal-pendiente-bg:     #fdf3e0;
+  --cal-pendiente-border: #c68a2e;
+  --cal-pendiente-text:   #8a5f1f;
+
+  --cal-aceptada-bg:     #e3f6f0;
+  --cal-aceptada-border: #2f9d86;
+  --cal-aceptada-text:   #1f7a67;
+
+  --cal-rechazada-bg:     #fcebef;
+  --cal-rechazada-border: #d9637e;
+  --cal-rechazada-text:   #b8375a;
+
+  padding-top: 8px;
+  font-family: inherit;
+}
+
+.admin-calendar-wrap .rbc-calendar {
+  font-family: inherit;
+  color: var(--cal-ink);
+}
+
+/* ── Toolbar ── */
+.admin-calendar-wrap .rbc-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--cal-grid-line);
+}
+
+.admin-calendar-wrap .rbc-toolbar .rbc-btn-group {
+  display: flex;
+  gap: 4px;
+  background: #faf8fc;
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.admin-calendar-wrap .rbc-toolbar .rbc-btn-group:first-child {
+  background: none;
+  padding: 0;
+  gap: 6px;
+}
+
+.admin-calendar-wrap .rbc-toolbar button {
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #6a6674;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.admin-calendar-wrap .rbc-toolbar .rbc-btn-group:first-child button {
+  background: #ffffff;
+  border: 1.5px solid #ece8f0;
+  color: #6a6674;
+}
+.admin-calendar-wrap .rbc-toolbar .rbc-btn-group:first-child button:hover {
+  border-color: var(--cal-accent);
+  color: var(--cal-accent);
+}
+
+.admin-calendar-wrap .rbc-toolbar button:hover {
+  background: var(--cal-accent-soft);
+  color: var(--cal-accent);
+}
+
+.admin-calendar-wrap .rbc-toolbar button.rbc-active,
+.admin-calendar-wrap .rbc-toolbar button.rbc-active:hover {
+  background: var(--cal-accent);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(125, 84, 168, 0.3);
+}
+
+.admin-calendar-wrap .rbc-toolbar-label {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--cal-ink);
+  flex: 1;
+  text-align: center;
+}
+
+/* ── Encabezados de días / grilla ── */
+.admin-calendar-wrap .rbc-header {
+  padding: 10px 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--cal-ink-soft);
+  border-bottom: 1.5px solid var(--cal-grid-line);
+  border-left: none;
+}
+
+.admin-calendar-wrap .rbc-header + .rbc-header {
+  border-left: 1px solid var(--cal-grid-line);
+}
+
+.admin-calendar-wrap .rbc-month-view,
+.admin-calendar-wrap .rbc-time-view,
+.admin-calendar-wrap .rbc-time-header.rbc-overflowing {
+  border-color: var(--cal-grid-line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.admin-calendar-wrap .rbc-day-bg + .rbc-day-bg,
+.admin-calendar-wrap .rbc-month-row + .rbc-month-row,
+.admin-calendar-wrap .rbc-timeslot-group,
+.admin-calendar-wrap .rbc-time-content > * + * > *,
+.admin-calendar-wrap .rbc-day-slot .rbc-time-slot {
+  border-color: var(--cal-grid-line);
+}
+
+.admin-calendar-wrap .rbc-off-range-bg {
+  background: #fafafa;
+}
+
+.admin-calendar-wrap .rbc-off-range {
+  color: #d5d2da;
+}
+
+.admin-calendar-wrap .rbc-label {
+  color: var(--cal-ink-soft);
+  font-size: 0.72rem;
+}
+
+/* ── Día actual ── */
+.admin-calendar-wrap .rbc-today {
+  background-color: var(--cal-today-tint);
+}
+
+.admin-calendar-wrap .rbc-current-time-indicator {
+  background-color: var(--cal-accent);
+  height: 2px;
+}
+
+/* ── Eventos (citas) ── */
+.admin-calendar-wrap .rbc-event {
+  background: #f1f1ef;
+  border: none;
+  border-left: 4px solid #9aabb8;
+  border-radius: 9px;
+  padding: 5px 10px;
+  box-shadow: 0 1px 4px rgba(44, 42, 48, 0.08), 0 0 0 2px #ffffff;
+  box-sizing: border-box;
+}
+
+.admin-calendar-wrap .rbc-event:focus {
+  outline: 2px solid var(--cal-accent);
+  outline-offset: 1px;
+}
+
+.admin-calendar-wrap .rbc-event-label {
+  display: none;
+}
+
+.admin-calendar-wrap .rbc-selected {
+  box-shadow: 0 1px 4px rgba(44, 42, 48, 0.08), 0 0 0 2px #ffffff, 0 0 0 3.5px var(--cal-accent) !important;
+}
+
+.cal-event-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1.25;
+  overflow: hidden;
+}
+
+.cal-event-name {
+  font-weight: 600;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cal-event-time {
+  font-weight: 500;
+  font-size: 0.68rem;
+  opacity: 0.75;
+}
+
+.admin-calendar-wrap .rbc-show-more {
+  background: var(--cal-accent-soft);
+  color: var(--cal-accent);
+  border-radius: 6px;
+  padding: 1px 6px;
+  font-weight: 600;
+  font-size: 0.68rem;
+}
+
+/* ── Modal de detalle de cita (calendario) ── */
+.appt-detail-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.appt-detail-card {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 420px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.appt-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.appt-detail-header h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a2e25;
+}
+
+.appt-detail-close-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #999;
+  line-height: 1;
+  padding: 0;
+}
+.appt-detail-close-btn:hover {
+  color: #333;
+}
+
+.appt-detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+  font-size: 0.85rem;
+  color: #4a6558;
+}
+.appt-detail-body strong {
+  color: #1a2e25;
+}
 
 /* ── Responsive ── */
 @media (max-width: 640px) {
