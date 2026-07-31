@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom'
 
 export default function AdminRoute({ children }) {
-  const isAuth = localStorage.getItem('adminAuth') === 'true'
-  return isAuth ? children : <Navigate to="/admin/login" replace />
+  const token = localStorage.getItem('adminToken')
+  return token ? children : <Navigate to="/admin/login" replace />
 }

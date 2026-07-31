@@ -2,22 +2,33 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './AdminLogin.css'
 
-const ADMIN_USER = 'admin'
-const ADMIN_PASS = 'gioclinica2026'
+const API_URL = import.meta.env.PROD ? '' : 'http://localhost:3000';
 
 export default function AdminLogin() {
   const navigate = useNavigate()
   const [usuario, setUsuario] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (usuario === ADMIN_USER && password === ADMIN_PASS) {
-      localStorage.setItem('adminAuth', 'true')
+    setLoading(true)
+    setError(false)
+    try {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuario, password }),
+      })
+      if (!res.ok) throw new Error('Credenciales inválidas')
+      const data = await res.json()
+      localStorage.setItem('adminToken', data.token)
       navigate('/admin')
-    } else {
+    } catch {
       setError(true)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -50,7 +61,9 @@ export default function AdminLogin() {
           {error && (
             <p className="login-error">Usuario o contraseña incorrectos</p>
           )}
-          <button type="submit" className="login-btn">Ingresar</button>
+          <button type="submit" className="login-btn" disabled={loading}>
+            {loading ? 'Ingresando…' : 'Ingresar'}
+          </button>
         </form>
       </div>
     </main>
