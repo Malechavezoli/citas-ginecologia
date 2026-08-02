@@ -48,6 +48,14 @@ function CalendarEvent({ event }) {
   )
 }
 
+// react-big-calendar solo usa la hora/minuto de estos Date; el día es arbitrario.
+function timeStringToDate(hhmm, extraMinutes = 0) {
+  const [hours, minutes] = hhmm.split(':').map(Number)
+  return new Date(1972, 0, 1, hours, minutes + extraMinutes, 0)
+}
+
+const DEFAULT_SCHEDULE = { horaInicio: '08:00', horaFin: '17:00' }
+
 export default function Admin() {
   const navigate = useNavigate()
   const [appointments, setAppointments] = useState([])
@@ -56,6 +64,7 @@ export default function Admin() {
   const [view, setView] = useState('lista')
   const [actioningId, setActioningId] = useState(null)
   const [selectedAppt, setSelectedAppt] = useState(null)
+  const [schedule, setSchedule] = useState(DEFAULT_SCHEDULE)
 
   const authFetch = async (path, options = {}) => {
     const token = localStorage.getItem('adminToken')
@@ -90,6 +99,17 @@ export default function Admin() {
 
   useEffect(() => { fetchAppointments() }, [])
 
+  useEffect(() => {
+    fetch(`${API_URL}/api/schedule`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.horaInicio && data?.horaFin) {
+          setSchedule({ horaInicio: data.horaInicio, horaFin: data.horaFin })
+        }
+      })
+      .catch(() => {})
+  }, [])
+
   const handleLogout = () => {
     localStorage.removeItem('adminToken')
     navigate('/admin/login')
@@ -120,6 +140,12 @@ export default function Admin() {
   const pendiente = appointments.filter(a => a.estado === 'pendiente').length
   const aceptada  = appointments.filter(a => a.estado === 'aceptada').length
   const rechazada = appointments.filter(a => a.estado === 'rechazada').length
+
+  // Recorta el rango de horas visible en las vistas Semana/Día al horario
+  // de atención de la clínica (+1h de margen al cierre), en vez de mostrar
+  // las 24h del día.
+  const calendarMin = useMemo(() => timeStringToDate(schedule.horaInicio), [schedule])
+  const calendarMax = useMemo(() => timeStringToDate(schedule.horaFin, 60), [schedule])
 
   // Construye el horario a partir del string "hora" (siempre en hora Colombia)
   // y solo toma el día de "fecha" en UTC, para no depender de la zona horaria
@@ -300,6 +326,8 @@ export default function Admin() {
               endAccessor="end"
               defaultView="week"
               views={['month', 'week', 'day']}
+              min={calendarMin}
+              max={calendarMax}
               style={{ height: 600 }}
               eventPropGetter={eventPropGetter}
               components={{ event: CalendarEvent }}
