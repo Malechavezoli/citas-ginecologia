@@ -176,6 +176,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="footer">
         <p>© 2025 Dra. Giovanna Oliveros · Ginecoobstetra</p>
+        <Link to="/admin/login" className="footer-admin-link">Acceso administrativo</Link>
       </footer>
 
     </main>

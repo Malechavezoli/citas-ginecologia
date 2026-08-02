@@ -331,6 +331,17 @@
   line-height: 1.6;
 }
 
+.footer-admin-link {
+  display: inline-block;
+  margin-top: 4px;
+  color: #c3d4cc;
+  text-decoration: none;
+}
+.footer-admin-link:hover {
+  color: #7a9e8e;
+  text-decoration: underline;
+}
+
 /* ── Responsive ── */
 @media (max-width: 360px) {
   .page {
