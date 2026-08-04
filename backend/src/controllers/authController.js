@@ -3,22 +3,9 @@ const jwt = require('jsonwebtoken');
 
 const login = async (req, res) => {
   try {
-    if (req.headers['x-debug-auth'] === 'true') {
-      return res.json({
-        debug: true,
-        adminUsernameExists: !!process.env.ADMIN_USERNAME,
-        adminPasswordHashExists: !!process.env.ADMIN_PASSWORD_HASH,
-        adminPasswordHashLength: process.env.ADMIN_PASSWORD_HASH?.length ?? 0,
-        jwtSecretExists: !!process.env.JWT_SECRET,
-        vercelEnv: process.env.VERCEL_ENV ?? null,
-      });
-    }
-
-    console.log('DEBUG - ADMIN_USERNAME existe:', !!process.env.ADMIN_USERNAME);
-    console.log('DEBUG - ADMIN_PASSWORD_HASH existe:', !!process.env.ADMIN_PASSWORD_HASH);
-    console.log('DEBUG - ADMIN_PASSWORD_HASH longitud:', process.env.ADMIN_PASSWORD_HASH?.length);
-    console.log('DEBUG - JWT_SECRET existe:', !!process.env.JWT_SECRET);
-    console.log('DEBUG - usuario recibido:', req.body.usuario);
+    console.log('DEBUG - req.body:', JSON.stringify(req.body));
+    console.log('DEBUG - usuario recibido:', JSON.stringify(req.body.usuario));
+    console.log('DEBUG - ADMIN_USERNAME guardado:', JSON.stringify(process.env.ADMIN_USERNAME));
 
     const { usuario, password } = req.body;
 
