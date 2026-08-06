@@ -56,6 +56,25 @@ function timeStringToDate(hhmm, extraMinutes = 0) {
 
 const DEFAULT_SCHEDULE = { horaInicio: '08:00', horaFin: '17:00' }
 
+function StatHoverPanel({ list }) {
+  return (
+    <div className="stat-hover-panel">
+      {list.length === 0 ? (
+        <p className="stat-hover-empty">Sin citas en esta categoría</p>
+      ) : (
+        <ul className="stat-hover-list">
+          {list.map((a) => (
+            <li key={a._id}>
+              <span className="stat-hover-name">{a.nombrePaciente}</span>
+              <span className="stat-hover-meta">{formatFecha(a.fecha)} · {a.hora ?? '—'}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
 export default function Admin() {
   const navigate = useNavigate()
   const [appointments, setAppointments] = useState([])
@@ -65,6 +84,7 @@ export default function Admin() {
   const [actioningId, setActioningId] = useState(null)
   const [selectedAppt, setSelectedAppt] = useState(null)
   const [schedule, setSchedule] = useState(DEFAULT_SCHEDULE)
+  const [search, setSearch] = useState('')
 
   const authFetch = async (path, options = {}) => {
     const token = localStorage.getItem('adminToken')
@@ -136,10 +156,22 @@ export default function Admin() {
     }
   }
 
-  const total     = appointments.length
-  const pendiente = appointments.filter(a => a.estado === 'pendiente').length
-  const aceptada  = appointments.filter(a => a.estado === 'aceptada').length
-  const rechazada = appointments.filter(a => a.estado === 'rechazada').length
+  // Filtra por nombre o teléfono; el resto de la vista (stats, lista,
+  // calendario) se deriva de este conjunto ya filtrado.
+  const normalizedSearch = search.trim().toLowerCase()
+  const filteredAppointments = useMemo(() => {
+    if (!normalizedSearch) return appointments
+    return appointments.filter((a) => {
+      const nombre = (a.nombrePaciente ?? '').toLowerCase()
+      const telefono = (a.telefonoPaciente ?? '').toLowerCase()
+      return nombre.includes(normalizedSearch) || telefono.includes(normalizedSearch)
+    })
+  }, [appointments, normalizedSearch])
+
+  const total     = filteredAppointments.length
+  const pendientesList = filteredAppointments.filter(a => a.estado === 'pendiente')
+  const aceptadasList  = filteredAppointments.filter(a => a.estado === 'aceptada')
+  const rechazadasList = filteredAppointments.filter(a => a.estado === 'rechazada')
 
   // Recorta el rango de horas visible en las vistas Semana/Día al horario
   // de atención de la clínica (+1h de margen al cierre), en vez de mostrar
@@ -162,11 +194,11 @@ export default function Admin() {
     )
   }
 
-  const events = useMemo(() => appointments.map((a) => {
+  const events = useMemo(() => filteredAppointments.map((a) => {
     const start = buildEventStart(a)
     const end = new Date(start.getTime() + 60 * 60000)
     return { id: a._id, title: `${a.hora ?? ''} ${a.nombrePaciente}`, start, end, resource: a }
-  }), [appointments])
+  }), [filteredAppointments])
 
   const eventPropGetter = (event) => {
     const s = EVENT_STYLES[event.resource.estado] ?? { bg: '#f1f1ef', border: '#9aabb8', text: '#5a6b63' }
@@ -199,20 +231,23 @@ export default function Admin() {
           <span className="stat-number">{total}</span>
           <span className="stat-label">Total de citas</span>
         </div>
-        <div className="stat-card">
+        <div className="stat-card stat-card--hoverable">
           <span className="stat-dot stat-dot--pending" />
-          <span className="stat-number stat-number--pending">{pendiente}</span>
+          <span className="stat-number stat-number--pending">{pendientesList.length}</span>
           <span className="stat-label">Pendientes</span>
+          <StatHoverPanel list={pendientesList} />
         </div>
-        <div className="stat-card">
+        <div className="stat-card stat-card--hoverable">
           <span className="stat-dot stat-dot--confirmed" />
-          <span className="stat-number stat-number--confirmed">{aceptada}</span>
+          <span className="stat-number stat-number--confirmed">{aceptadasList.length}</span>
           <span className="stat-label">Aceptadas</span>
+          <StatHoverPanel list={aceptadasList} />
         </div>
-        <div className="stat-card">
+        <div className="stat-card stat-card--hoverable">
           <span className="stat-dot stat-dot--cancelled" />
-          <span className="stat-number stat-number--cancelled">{rechazada}</span>
+          <span className="stat-number stat-number--cancelled">{rechazadasList.length}</span>
           <span className="stat-label">Rechazadas</span>
+          <StatHoverPanel list={rechazadasList} />
         </div>
       </div>
 
@@ -244,6 +279,25 @@ export default function Admin() {
           </div>
         </div>
 
+        <div className="admin-search-row">
+          <input
+            type="text"
+            className="admin-search-input"
+            placeholder="Buscar por nombre o teléfono…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          {search && (
+            <button
+              className="admin-search-clear"
+              onClick={() => setSearch('')}
+              aria-label="Limpiar búsqueda"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
         {loading && (
           <div className="admin-loading">
             <span className="admin-spinner" />
@@ -259,7 +313,11 @@ export default function Admin() {
           <div className="admin-empty">No hay citas agendadas aún</div>
         )}
 
-        {!loading && !error && appointments.length > 0 && view === 'lista' && (
+        {!loading && !error && appointments.length > 0 && filteredAppointments.length === 0 && (
+          <div className="admin-empty">No hay citas que coincidan con "{search}"</div>
+        )}
+
+        {!loading && !error && filteredAppointments.length > 0 && view === 'lista' && (
           <div className="admin-table-wrap">
             <table className="admin-table">
               <thead>
@@ -275,7 +333,7 @@ export default function Admin() {
                 </tr>
               </thead>
               <tbody>
-                {appointments.map((a) => {
+                {filteredAppointments.map((a) => {
                   const est = ESTADO[a.estado] ?? { label: a.estado, cls: '' }
                   return (
                     <tr key={a._id}>
@@ -316,7 +374,7 @@ export default function Admin() {
           </div>
         )}
 
-        {!loading && !error && appointments.length > 0 && view === 'calendario' && (
+        {!loading && !error && filteredAppointments.length > 0 && view === 'calendario' && (
           <div className="admin-calendar-wrap">
             <Calendar
               localizer={localizer}
