@@ -3,17 +3,13 @@ const jwt = require('jsonwebtoken');
 
 const login = async (req, res) => {
   try {
-    console.log('DEBUG - req.body:', JSON.stringify(req.body));
-    console.log('DEBUG - usuario recibido:', JSON.stringify(req.body.usuario));
-    console.log('DEBUG - ADMIN_USERNAME guardado:', JSON.stringify(process.env.ADMIN_USERNAME));
-
     const { usuario, password } = req.body;
 
     if (!usuario || !password) {
       return res.status(400).json({ message: 'Faltan campos obligatorios: usuario, password' });
     }
 
-    if (usuario !== process.env.ADMIN_USERNAME) {
+    if (usuario.trim() !== process.env.ADMIN_USERNAME?.trim()) {
       return res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
     }
 
